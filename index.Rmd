@@ -65,7 +65,7 @@ For the purposes of this course, I have cleaned and pruned the original dataset,
 
 # Dependencies
 
-This course requires the following libraries installed on your machine prior to the course:
+This course requires the following libraries installed on your machine:
 
 * **tufte**
 * **knitr**
