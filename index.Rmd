@@ -26,6 +26,8 @@ knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
 options(htmltools.dir.version = FALSE)
 ```
 
+https://zenodo.org/badge/291138698.svg
+
 # Description
 
 This site introduces the course *Introduction to Statistical Learning in R*. The course provides an introduction to statistics and probability covering essential topics in descriptive and inferential statistics and supervised machine learning. It adopts a problem-to-solution teaching approach, defining a practical problem and illustrating how statistics can enable understanding to make critically informed decisions about a population by examining a random sample. It uses a learning-by-doing approach based on real-world examples in various contexts. This also teaches how to conduct statistical data analysis in R. The course is organised around 6 sessions. Each session is designed to provide a combination of key statistical concepts and practical application through the use of R.
@@ -51,8 +53,7 @@ The notes for each session are:
 * **Session 3** [**Statistical Significance**](d1n3_confidence.html): Hypothesis testing & confidence intervals
 
 * **Session 4** [**Correlation**](d2n1_correlation.html): Correlation visualisation & measures
-* **Session 5.1** [**Regression Analysis**](d2n2_regression.html): Linear regression & dummy variables
-* **Session 5.2** [**Regression Analysis**](d2n2_regression.html): Logistic regression
+* **Session 5** [**Regression Analysis**](d2n2_regression.html): Linear regression, dummy variables & logistic regression
 * **Session 6** [**Supervised Machine Learning**](d2n3_machinelearning.html): Tree Regressions, Random Forest & Cross-validation
 
 # Data
