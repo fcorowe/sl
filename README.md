@@ -32,8 +32,7 @@ The notes for each session are:
 * **Session 3** [**Statistical Significance**](d1n3_confidence.html): Hypothesis testing & confidence intervals
 
 * **Session 4** [**Correlation**](d2n1_correlation.html): Correlation visualisation & measures
-* **Session 5.1** [**Regression Analysis**](d2n2_regression.html): Linear regression & dummy variables
-* **Session 5.2** [**Regression Analysis**](d2n2_regression.html): Logistic regression
+* **Session 5** [**Regression Analysis**](d2n2_regression.html): Linear regression, dummy variables & logistic regression
 * **Session 6** [**Supervised Machine Learning**](d2n3_machinelearning.html): Tree Regressions, Random Forest & Cross-validation
 
 ## Citation
