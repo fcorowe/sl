@@ -1,6 +1,6 @@
 # Introduction to Statistical Learning
 
-[![DOI](https://zenodo.org/badge/273787592.svg)](https://zenodo.org/badge/latestdoi/273787592)
+[![DOI](https://zenodo.org/badge/291138698.svg)](https://zenodo.org/badge/latestdoi/291138698)
 
 [Francisco Rowe](http://www.franciscorowe.com) [[`@fcorowe`](http://twitter.com/fcorowe)]<sup>1*</sup>
 
@@ -46,6 +46,6 @@ If you use the interative map and/or code, you can give appropriate attribution 
   title = {Introduction to Statistical Learning in R},
   year = 2020,
   url = {\url{https://fcorowe.github.io/sl/}},
-  doi = {10.5281/zenodo.3910381},
+  doi = {10.5281/zenodo.4007043},
 }
 ```
