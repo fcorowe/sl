@@ -9,12 +9,6 @@
 <sup>*</sup> *Correspondence*:
 F.Rowe-Gonzalez@liverpool.ac.uk
 
-This repository contains an introductory course on statistics and supervised machine learning using R. It covers 
-
-contains data and code .
-
-[![Internal migration flows across Europe](fig/fig1.png)](flowmap_EU.html)
-
 This site introduces the course *Introduction to Statistical Learning in R*. The course provides an introduction to statistics and probability covering essential topics in descriptive and inferential statistics and supervised machine learning. It adopts a problem-to-solution teaching approach, defining a practical problem and illustrating how statistics can enable understanding to make critically informed decisions about a population by examining a random sample. It uses a learning-by-doing approach based on real-world examples in various contexts. This also teaches how to conduct statistical data analysis in R. The course is organised around 6 sessions. Each session is designed to provide a combination of key statistical concepts and practical application through the use of R.
 
 The course comprises three main components. The first component focuses on descriptive statistics, including descriptive statistics of different data types, common probability distributions and measures of centrality and dispersion. The second component involves inferential statistics covering hypothesis testing, confidence intervals, correlation, regression analysis, supervised machine learning approaches and cross-validation.
