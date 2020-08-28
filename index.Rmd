@@ -53,20 +53,15 @@ The notes for each session are:
 * **Session 3** [**Statistical Significance**](d1n3_confidence.html): Hypothesis testing & confidence intervals
 
 * **Session 4** [**Correlation**](d2n1_correlation.html): Correlation visualisation & measures
-* [Coffee break]
 * **Session 5.1** [**Regression Analysis**](d2n2_regression.html): Linear regression & dummy variables
-* [Lunch break]
 * **Session 5.2** [**Regression Analysis**](d2n2_regression.html): Logistic regression
-* [Coffee break]
 * **Session 6** [**Supervised Machine Learning**](d2n3_machinelearning.html): Tree Regressions, Random Forest & Cross-validation
 
 # Data
 
-For this course, we will use 2011 Census data for England and Wales, and the *Quarterly Labour Force Survey (QLFS)*. QLFS is a quarterly sample survey of households living at private addresses in the United Kindgdom. The survey is conducted by the Office for National Statistics. Its purpose is to provide information on the UK labour market. We will be using the file ‘qlfs.Rdata’, which contains a small sub-set of the information collected by the QLFS in the first quarter (January to March) 2012. 
+For this course, we uses 2011 Census data for England and Wales, and the *Quarterly Labour Force Survey (QLFS)*. QLFS is a quarterly sample survey of households living at private addresses in the United Kingdom. The survey is conducted by the Office for National Statistics. Its purpose is to provide information on the UK labour market. A file labelled ‘qlfs.Rdata’ contains the data. It is a small sub-set of the information collected by the QLFS in the first quarter (January to March) 2012. 
 
-For the purposes of this course, I have cleaned and pruned the original dataset, and saved the resulting file in R format (`.Rdata`). The census data are in aggregate format at the district level and is labelled ‘data_census’.
-
-The data and relevant documentation will be available in the *data* folder. However, before you do use the data you must complete the *data access* test on [Google Forms](https://forms.gle/HP3z5PxeYdztMYVe9). The test informs you about the conditions attached to being allowed to access the QLFS; you pass the test by agreeing to these conditions which then makes the QLFS available for you to use. 
+For the purposes of this course, I have cleaned and pruned the original dataset, and saved the resulting file in R format (`.Rdata`). The census data are in aggregate format at the district level and is labelled ‘data_census’. The data and relevant documentation will be available in the [*data* folder](../data). 
 
 # Dependencies
 
@@ -99,7 +94,6 @@ Each notebook has slightly different dependencies that cater to the topics cover
 
 
 * Further reading on tidyverse, see [R for Data Science](https://r4ds.had.co.nz) @grolemund_wickham_2019_book.
-
 
 
 ```{r, include=FALSE}
