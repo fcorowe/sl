@@ -42,8 +42,6 @@ Having successfully completed this course, you will be able to:
 5.	Carry out statistical data analysis in R.
 6.  Have a basic understanding of supervised machine learning and cross-validation.
 
-Before undertaking this course, the following DataCamp courses are recommended: [Introduction to R](https://www.datacamp.com/courses/free-introduction-to-r) and [Importing & Cleaning Data with R](https://www.datacamp.com/tracks/importing-cleaning-data-with-r).
-
 # Schedule
 
 The notes for each session are:
