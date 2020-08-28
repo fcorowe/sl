@@ -1,0 +1,716 @@
+---
+title: "Descriptive Statistics"
+author: "Francisco Rowe"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_html:
+    css: extra.css
+    number_sections: yes
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_book:
+    citation_package: natbib
+    latex_engine: xelatex
+link-citations: yes
+subtitle: Measures of Centrality & Dispersion
+bibliography: skeleton.bib
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+library(knitr)
+library(tidyverse)
+library(kableExtra)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+```
+
+In this session, we continue with *Descriptive Statistics* focusing on understanding how we can characterise a variable distribution. Each variable distribution has two key components, known as moments in Statistics: *centrality* and *spread*. We will look at the appropriate statistical measure of centrality and spread depending on the type of data in analysis.
+
+# Read data
+
+```{r}
+# clean workspace
+rm(list=ls())
+# load data
+load("../data/data_qlfs.RData") 
+```
+
+# Type of Data
+
+Recall, there are two main types of data:
+
+## Categorical
+
+Variable has response categories
+
+*Nominal*: no specific order to the categories eg. gender (male/female)
+
+*Ordinal*: categories have a clear ranking eg. age groups (young; middle aged; old)
+
+## Continuous (aka Scale)
+
+Variable is a precise measure of a quantity.
+
+*Continuous* (skewed): distribution of measures NOT symmetrical about the mean (skew <> 0) eg. income (to nearest penny)
+
+*Continuous* (symmetrical): distribution of measures IS symmetrical about the mean (skew = 0) eg. height (to nearest mm)
+
+The graphs below illustrate the difference between a symmetrical and a skewed distribution:
+
+```{r, eval=TRUE, echo=FALSE, fig.margin = TRUE}
+set.seed(794)
+symm.data <- rnorm(1000000)
+skew.data <- rlnorm(10000, sdlog = 0.3)
+neg.skew.data <- skew.data * -1
+
+ggplot(data=data.frame(symm.data)) +
+  geom_histogram( aes(x=symm.data), bins=30 ) +
+  xlab("Symmetrical") +
+  scale_y_continuous(NULL, breaks = NULL) +
+  scale_x_continuous(breaks = NULL) +
+  annotate("text", label = "Skew = 0", x = +2.25, y = 111000, colour="black", size=8) +
+  theme_classic()
+```
+```{r, eval=TRUE, echo=FALSE, fig.margin = TRUE}
+ggplot(data=data.frame(skew.data)) +
+  geom_histogram( aes(x=skew.data), bins=30 ) +
+  xlab("Positively Skewed") +
+  scale_y_continuous(NULL, breaks = NULL) +
+  scale_x_continuous(breaks = NULL) +
+  annotate("text", label = "Skew = +1", x = +2.25, y = 750, colour="black", size=8) +
+  theme_classic()
+```
+
+```{r, eval=TRUE, echo=FALSE, fig.margin = TRUE, fig.cap = 'Fig.1 Skewness of a distribution'}
+ggplot(data=data.frame(neg.skew.data)) +
+  geom_histogram( aes(x=neg.skew.data), bins=30 ) +
+  xlab("Negatively Skewed") +
+  scale_y_continuous(NULL, breaks = NULL) +
+  scale_x_continuous(breaks = NULL) +
+  annotate("text", label = "Skew = -1", x = -2.25, y = 750, colour="black", size=8) +
+  theme_classic()
+```
+
+
+**TASK #1** Work out the data type for each of the following variables:
+
+* Marital status (MaritalStatus)
+* Age (Age)
+* Age group (AgeGroup)
+* Tenure (Tenure)
+* Highest academic qualification (HighestQual)
+* Gross weekly pay (GrossPay)
+
+\newpage
+
+# Measures of Central Tendency
+
+*Central tendency* is statistical jargon for *'the average / mean'*.
+
+It is important to realise that the statistic used to measure the average varies by data type:
+
+Data Type              | Measure of average
+---------------------- | -------------------
+Nominal                | Mode
+Ordinal                | Median
+Scale (skewed^1^)      | Median
+Scale (symmetrical^1^) | Mean
+
+^1^ Symmetrical = skew close to 0 (i.e. in range -0.5 to 0.5)
+
+```{r}
+# attach data
+attach(qlfs)
+```
+
+## Mean
+```{r}
+mean(Age)
+```
+
+## Media
+```{r}
+median(Age)
+```
+
+## Mode
+
+R does not have a standard in-built function to calculate mode. So we create a user function to calculate mode of a data set in R.
+
+```{r}
+## create the function.
+  mode <- function(v) {
+     uniqv <- unique(v)
+     uniqv[which.max(tabulate(match(v, uniqv)))]
+  }
+
+mode(Age)
+```
+
+Or you can use:
+```{r}
+summary(Age)
+```
+Or for all the variables in the data
+```{r, eval=FALSE}
+summary(qlfs)
+```
+
+**TASK #2** Calculate the most appropriate measure of the ‘average’ for each of the following variables:
+
+* Marital status (MaritalStatus)
+* Age group (AgeGroup)
+* Tenure (Tenure)
+* Highest academic qualification (HighestQual)
+* Gross weekly pay (GrossPay)
+
+\newpage
+
+# Measures of Dispersion
+
+Dispersion is statistical jargon for the *spread* of a distribution.
+
+The graphs below show two symmetrical distributions; one with a wide spread (large dispersion); and one with a narrow spread (small dispersion).
+
+```{r, eval=TRUE, echo=FALSE, fig.margin = TRUE, fig.cap = 'Fig.2 Dispersion'}
+df.wide <- data.frame( value=rnorm(100000, sd=3) )
+df.wide$width="Wide"
+
+df.narrow <- data.frame( value=rnorm(100000) )
+df.narrow$width="Narrow"
+
+df <- rbind(df.wide, df.narrow)
+#head(df)
+#tail(df)
+
+ggplot(data=data.frame(df)) +
+  geom_histogram( aes(x=value, y = ..density..), bins=50 ) +
+  facet_wrap(~width) +
+  theme_classic()
+```
+
+The most appropriate statistic for summarising the *dispersion* (spread) of a distribution also varies by data type:
+
+Data Type              | Measure of dispersion
+---------------------- | -------------------
+Nominal                | % Misclassified
+Ordinal                | % Misclassified
+Scale (skewed)         | Inter-Quartile Range
+Scale (symmetrical)    | Standard Deviation / Variance
+
+## Dispersion of Continuous Variables
+
+### Central Tendency As a Model of The Data
+
+People and places are complex entities. The art of statistical analysis is to distil the essence of this complexity into simplified models of reality.
+
+The average is the simplest model of all, and is widely used. We are frequently told that average wages, health or educational outcomes, sales have gone up or down.
+
+This begs the immediate question: how well does our model represent the reality?
+
+We can best illustrate this by focussing on only the first 10 cases in our data, and treating them as if they were the entire population (Fig. 3).
+
+```{r, echo=FALSE, fig.margin = TRUE, fig.cap = 'Fig.3 Age of 10 respondents'}
+#Create a smaller dataset, containing only the first 10 cases in the qlfs
+qlfs.10 <- qlfs[1:10, ]
+
+#...and plot the variabiltiy of their ages
+ggplot(data=qlfs.10) +
+  geom_point(aes(y=Age, x=as.numeric(row.names(qlfs.10)))) +
+  scale_x_discrete(name ="Respondent", 
+                 limits=c("1","2","3", "4", "5", "6", "7", "8", "9", "10")) +
+  theme_classic()
+```
+
+As can be seen from this graph, the age of these 10 respondents varies from 18 to 75.
+
+A simple model of respondent's age is their average (mean) age.
+
+We can add a dashed horizontal line to the graph to represent this model (Fig. 4).
+
+```{r, echo=FALSE, fig.margin = TRUE, fig.cap = 'Fig.4 Adding the mean age'}
+ggplot(data=qlfs.10) +
+  geom_point(aes(y=Age, x=as.numeric(row.names(qlfs.10)))) +
+  geom_hline(aes(yintercept=mean(Age)), colour="blue", linetype= "dashed") +
+  scale_x_discrete(name ="Respondent", 
+                 limits=c("1","2","3", "4", "5", "6", "7", "8", "9", "10")) +
+  theme_classic()
+```
+
+Then we can add vertical lines measuring the distance (*deviation*) of each observation from the mean (Fig. 5).
+
+```{r, echo=FALSE, fig.margin = TRUE, fig.cap = 'Fig.5 Measuring the deviation'}
+# save copy of plot above as a data object
+p3 <- ggplot(data=qlfs.10) +
+       geom_point(aes(y=Age, x=as.numeric(row.names(qlfs.10)))) +
+       geom_hline(aes(yintercept=mean(Age)), colour="blue", linetype= "dashed") +
+       scale_x_discrete(name ="Respondent", 
+                 limits=c("1","2","3", "4", "5", "6", "7", "8", "9", "10")) +
+       theme_classic()
+
+# calculate info. needed to add deviation lines
+x <- as.numeric(row.names(qlfs.10))
+y <- qlfs.10$Age
+yend <- mean(qlfs.10$Age)
+
+# add the deviation lines to the plot data.object, one per observation in the dataset
+values <- c(1:10)
+for (i in values) {
+   p3 <- p3 + geom_segment(x=x[i], y=y[i], xend=x[i], yend=yend, colour="red")
+}
+
+# plot the resulting data.object
+p3
+```
+
+### Model Error
+
+#### Calculating The Error
+
+Clearly, each vertical line in the graph in Fig.5 provides a measure of the difference between one of the observations and the model or mean age.
+
+We can represent this information as a data.frame:
+
+```{r, echo=TRUE}
+df <- data.frame(Respondent = 1:10,
+                 Age = qlfs.10$Age,
+                 model = mean(qlfs.10$Age),
+                 error = qlfs.10$Age - mean(qlfs.10$Age) )
+```
+
+```{r, eval=FALSE, echo=TRUE}
+df
+```
+
+
+```{r kable1, eval=TRUE, echo=FALSE}
+kable(df)
+```
+
+The model we are using to summarise the ages of the population members is the `average` (central tendency) of the dataset, specifically, the `mean age` of all members of the population ie. `54`.
+
+The difference between the first person's age and the `mean age = 42 - 54 = -12`. This difference is known as the *model error*.
+
+#### Overall Model Error
+
+Looking back to the graph, it is also clear that the greater the total length of the vertical lines (deviations from the model), the worse the model fits the data.
+
+What happens if we change our model from the assumption that everyone is of mean age, to the assumption that everyone is 21? - See Fig.6.
+
+```{r, eval=TRUE, echo=FALSE, message=FALSE, fig.margin = TRUE}
+#Save copy of plot above as a data object
+p4 <- ggplot(data=qlfs.10) +
+       geom_point(aes(y=Age, x=as.numeric(row.names(qlfs.10)))) +
+       geom_hline(aes(yintercept=21), colour="blue", linetype= "dashed") +
+       scale_x_discrete(name ="Model: Age = 21", 
+                 limits=c("1","2","3", "4", "5", "6", "7", "8", "9", "10")) +
+       theme_classic()
+
+p3 <- p3 + scale_x_discrete(name ="Model: Age = mean = 54", 
+                 limits=c("1","2","3", "4", "5", "6", "7", "8", "9", "10"))
+
+#Calculate info. needed to add deviation lines
+x <- as.numeric(row.names(qlfs.10))
+y <- qlfs.10$Age
+yend <- 21
+
+#Add the deviation lines to the plot data.object, one per observation in the dataset
+values <- c(1:10)
+
+for (i in values) {
+   p4 <- p4 + geom_segment(x=x[i], y=y[i], xend=x[i], yend=yend, colour="red")
+}
+
+p3
+```
+
+```{r, eval=TRUE, echo=FALSE, message=FALSE, fig.margin = TRUE, fig.cap = 'Fig.6 Error comparison'}
+p4
+```
+
+The answer is that the total length of the vertical distances from the model is clearly greater when the model is `Age = 21` than when the model is `Age = 54`.
+
+## Measures of Dispersion
+
+There are a number of ways of summarising the overall model error.
+
+### Total Model Error
+
+We can measure the total amount of error by summing up the deviations:
+
+$$ \mbox{Total Error} = \sum{(x_i - \overline{x}) } $$
+
+This is easy to calculate in _R_ using the _sum( )_ function:
+
+```{r}
+sum(df$error)
+```
+
+Why was the total error 0?
+
+### Total Squared Model Error
+
+Well, we can `square` the errors. This works, because a negative times a negative makes a positive. Hence we want to find:
+
+$$\mbox{Total Squared Error} = \sum{ \left(x_i - \overline{x}\right )^2 }$$
+
+Squaring all of the errors gives the following:
+
+```{r, eval=TRUE, echo=TRUE}
+df$square.error <- df$error^2
+```
+```{r, eval=FALSE, echo=TRUE}
+df
+```
+```{r kable2, eval=TRUE, echo=FALSE}
+kable(df)
+```
+
+From which we can derive the total squared error:
+
+```{r, eval=TRUE, echo=TRUE}
+sum(df$square.error)
+```
+
+### Population Variance
+
+The problem with Total Squared Error is that the larger the number of observations, the more scope there is for model error. Ten observations with a squared error of 0.1 each have a Total Square Error of 10 x 0.1 = 1.  Yet one hundred observations, also with a squared error of 0.1 each, will have a larger Total Squared Error because 100 x 0.1 = 10.
+
+Of more interest is the *variance*: the average (mean) squared error per respondent.
+
+$$\mbox{Var} = \sigma^2 = \frac{ \sum{ \left (x_i - \overline{x}\right )^2 } }{N}$$
+
+This is easily calculated:
+
+```{r}
+# First count and store the number of observations (rows) in the data.frame
+N <- nrow(df)
+N
+
+# Then calculate the variance
+variance <- sum(df$square.error) / N
+variance
+```
+
+The larger the dispersion (spread) of the data around the mean, the greater the variance (Fig.7).
+
+```{r, echo=FALSE, fig.margin = TRUE, fig.cap = 'Fig.7 Variance comparison'}
+qlfs %>% filter(as.numeric(HighestQual) <= 3) %>% 
+  ggplot(aes(x = Age)) + 
+  geom_density(fill = "grey", alpha = 0.6) +
+  facet_grid(. ~ HighestQual) +
+  theme_classic()
+```
+
+### Sample Variance
+
+In statistics, a distinction is often drawn between a population and a sample.
+
+A *population* is the entire set of entities of interest (e.g. all persons or households in the UK).
+
+A *sample* is a random sub-set of population entities (e.g. persons or household captured by the QLFS survey).
+
+The method for calculating the variance used above assumes that we are calculating the variance  of a set of *population* values around the *population mean*.
+
+We can calculate the variance of the sample values around the *sample mean* in a similar fashion. However, if we want to use the sample variance as an estimate of the population variance, we need to make a slight adjustment. This is because the unadjusted sample variance is a biased estimator of the population variance. It is biased because a sample is likely to omit some of the relatively rare values at the extreme ends of the population distribution. Due to the omission of some of these rarer extreme values, the unadjusted variance of the sample will on average be slightly smaller than the variance of the population.
+
+In order to correct for this bias, we simply need to divide the total square error by `N-1` instead of by `N`.
+
+```{r}
+variance.adjusted <- sum(df$square.error) / (N - 1)
+variance.adjusted
+```
+
+ie.
+
+$\mbox{Var}_{sample}= s^2 = \frac{ \sum{ \left (x_i - \overline{x}\right )^2 } }{N-1}$
+
+Regardless of sample size, in all cases the adjusted estimator of the population variance will be larger than the unadjusted estimator. The size of the difference between the estimators depends upon the size of the sample. 
+
+For large samples, dividing by `N` or `N-1` yields almost identical estimates of the population variance. For example, 100 / 100 = 1, whilst 100 / 99 = 1.01.  In contrast, for small samples the difference in estimated population variance can be noticeable. For example, 100/10 = 10, whilst 100/9 = 11.1. This reflects the fact that the smaller the sample size, the less likely the sample is to be fully representative of the population from which it is drawn.
+
+### Population Standard Deviation
+
+One problem with variance as a measure of dispersion is that it is measured in squared units. For instance, the variance for the distribution of respondents by `age` is measured in years squared. But *years squared* isn't a particularly intuitive measure of dispersion. 
+
+Fortunately we can overcome this by finding the square-root of the variance, which is known as the *standard deviation*. The standard deviation of a set of population values around the population mean can be calculated as follows:
+
+$\mbox{Std Dev} = \sigma = \sqrt{\frac{ \sum{ \left (x_i - \overline{x}\right )^2 } }{N}}$
+
+The standard deviation is measured in the same units as the original observations. For Age (measured in years), this would be years.
+
+```{r}
+standard.deviation <- variance^0.5
+standard.deviation
+```
+
+As might be expected, the larger the value of the standard deviation, the greater the dispersion (spread) of the observations around the population mean.
+
+### Sample Standard deviation
+
+If calculating the standard deviation based upon a *sample* we once again need to divide by `N-1` rather than `N` :
+
+```{r}
+standard.deviation.adjusted <- variance.adjusted^0.5
+standard.deviation.adjusted
+# or using the built-in R function:
+sd(df$Age)
+```
+
+Formally, this is:
+
+$\mbox{Std Dev}_{sample} = s = \sqrt{ \frac{ \sum{ \left (x_i - \overline{x}\right )^2 } }{N-1} }$
+
+In practice we normally sample measures of dispersion.
+
+### Inter-Quartile Range
+
+The variance and standard deviation are both based upon deviations from the mean. However, the mean is only a good measure of the average for symmetrical (non-skewed) distributions. Consequently the variance and standard deviation are poor measures of dispersion for asymmetrical distributions.
+
+For continuous data with a skewed distribution a more robust measure of dispersion is the Inter-Quartile Range (IQR).
+
+To calculate the IQR the data values first need to be listed in rank order, from lowest to highest; and then divided into four equal parts, or quartiles. The 'lower' quartile contains the 25% of data points with the lowest values; whilst the 'upper' quartile contains the 25% of data points with the highest values. The inter-quartile range (IQR) is the difference between the upper and lower quartiles:- i.e. the difference between the 25th and 75th percentiles of the data distribution.
+
+In the graph below colours flag the quartiles, whilst dashed vertical lines mark the 25th and 75th percentiles of the data distribution.
+
+```{r, eval=TRUE, echo=FALSE, message=FALSE, fig.margin = TRUE, fig.cap = 'Fig.8 Symmetrical distribution'}
+#Add variable flagging quartiles to df and df2
+df1 <- data.frame(x= c(1,2,2,3,3,3,4,4,4,4,5,5,5,5,5,5,6,6,6,6,6,6,7,7,7,7,8,8,8,9,9,10))
+df2 <- data.frame(x= c(2,3,3,4,4,4,4,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,7,7,7,7,8,8,9))
+
+df1$Quartile <- c(rep("Lower Quartile", 8), rep("Central 50%", 16),
+                  rep("Upper Quartile", 8) )
+df2$Quartile <- df1$Quartile
+
+#Plot graph for symmetrical distribution:
+ggplot(data=df1) +
+  geom_dotplot( aes(x=x, fill=Quartile), method="histodot", 
+                stackgroups=TRUE, binwidth=1 ) +
+  scale_fill_brewer(palette="Spectral") +
+  geom_vline(xintercept=4, linetype="dotted") +
+  geom_vline(xintercept=7, linetype="dotted") +
+  geom_segment(aes(x = 4, y = 0.33, xend = 7, yend = 0.33),
+               arrow=arrow(ends="both", type="closed",
+               length= unit(0.2, "cm") ) ) +
+  annotate("text", label="IQR", x=5.5, y=0.38, colour="black", size=8) +
+  annotate("text", label="Variance = 2.2", x=25, y=0.7, colour="black", size=8) +  
+  annotate("text", label="IQR = 3", x=25, y=0.6, colour="black", size=8) +
+  scale_x_continuous(breaks=c(0, 4, 7, 10, 20, 30), limits=c(0,30)) +
+  scale_y_continuous(NULL, breaks = NULL) +
+  theme_classic()
+```
+
+The advantage of the Inter-Quartile Range is that a few rogue outliers make little difference to its value, because the IQR focuses on the dispersion of the central 50% of observations:
+
+```{r, eval=TRUE, echo=FALSE, fig.margin = TRUE, fig.cap = 'Fig.9 Assymmetrical distribution'}
+df3 <- df1
+df3$x[16] <- 20
+df3$x[17] <- 30
+df3$x <- sort(df3$x)
+
+ggplot(data=df3) +
+  geom_dotplot( aes(x=x, fill=Quartile), method="histodot",   
+                stackgroups=TRUE, binwidth=1 ) +
+  scale_fill_brewer(palette="Spectral") +
+  geom_vline(xintercept=4, linetype="dotted") +
+  geom_vline(xintercept=7.25, linetype="dotted") +
+  geom_segment(aes(x = 4, y = 0.28, xend = 7.25, yend = 0.28),
+               arrow=arrow(ends="both", type="closed",
+               length= unit(0.2, "cm"))) +
+  annotate("text", label="IQR", x=5.75, y=0.33, colour="black", size=8) +
+  annotate("text", label="Variance = 5.3", x=25, y=0.7, colour="black", size=8) +
+  annotate("text", label="IQR = 3.25", x=25, y=0.6, 
+           colour="black", size=8) +  
+  scale_x_continuous(breaks=c(0, 4, 7, 10, 20, 30), limits=c(0,30)) +
+  scale_y_continuous(NULL, breaks = NULL) +
+  theme_classic()
+```  
+
+Calculating the IQR in _R_ requires use of the `quantile( )` function:
+
+```{r}
+# Create a data frame of the observations plotted in the first graph above
+df <- data.frame(x= c(1,2,2,3,3,3,4,4,4,4,5,5,5,5,5,5,6,6,6,6,6,6,7,7,7,7,8,8,8,9,9,10))
+
+#Find 25th percentile of variable x:
+quantile(df$x, 0.25)
+
+#Find 75th percentile of variable x:
+quantile(df$x, 0.75)    
+
+#Find the IQR (75th - 25th percentile):
+IQR <- quantile(df$x, 0.75) - quantile(df$x, 0.25)
+IQR
+
+#Get rid of annoying and misleading '75% label':
+attributes(IQR) <- NULL
+IQR
+```
+
+In practice we don't typically compute the IQR but we use boxplots to visualise the distribution of variables. Returning to our example, if we want to explore the distribution of `age` by `educational qualification`.
+
+```{r, echo=FALSE, fig.margin = TRUE, fig.cap = 'Fig.10 Boxplots of age by qualification'}
+qlfs %>% filter(as.numeric(HighestQual) <= 3) %>% 
+  ggplot(aes(HighestQual, Age)) + 
+  geom_boxplot() +
+  theme_classic()
+```
+
+## Dispersion of Categorical Variables
+
+### Uniform Dispersion
+
+For categorical data, the equivalent of assuming that all numerical values equal the mean is to assume that the observed values are spread evenly across the available categories. 
+
+In the graph below, we can see the distribution of `12` selected QLFS respondents across tenure categories (black bars); plus the distribution that would apply if respondents were spread evenly across categories (dashed horizontal line) - Fig.11.
+
+```{r, echo=FALSE, fig.margin = TRUE, fig.cap = 'Fig.11 Twelve selected individuals by tenure'}
+selected.persons <- c(10:14,29:30,15:18,22)
+
+ggplot( data=qlfs[selected.persons, ] ) +
+  geom_bar( aes(x=Tenure) ) +
+  scale_x_discrete( drop=FALSE ) +
+  geom_hline( yintercept = 3, colour="blue", linetype="dashed" ) +
+  theme_classic()
+```
+
+If the twelve respondents were split equally across four categories, there would be `3` respondents in each category (ie. `12 / 4 = 3`).
+
+### Model Error
+
+For this model (of even spread across categories), the model error is the difference between the observed frequency in each category and the frequency that would arise if the respondents were evenly distributed.
+
+```{r, echo=FALSE}
+# Declare the four categories
+Tenure <- c("Owned","Mortgaged","Rented: Social Landlord", "Rented: Private Landlord")
+
+# Declare observed number of respondents in each category
+Obs.Freq <- c(7,4,0,1)
+
+# Declare the model number of respondents in each category
+Model.Freq <- c(3,3,3,3)
+
+# Calculate the model error
+Error <- Obs.Freq - Model.Freq
+
+# Combine results into a data.frame
+df <- data.frame(Tenure, Obs.Freq, Model.Freq, Error)
+```
+
+```{r kable3, echo=FALSE}
+kable_styling(kable(df), full_width=F)
+```
+
+### Overall Error
+
+As before, the sum of errors cancels out to 0:
+
+```{r}
+sum(df$Error)
+```
+
+We therefore need to find an alternative summary measure of overall error. For categorical data this summary measure is based not on squared error, but on *absolute* error.
+
+### Total Absolute Error
+
+The absolute value of any number is the value of that number ignoring any negative sign.
+
+eg.
+```{r}
+abs(-15)
+abs(15)
+```
+
+The sum of the absolute errors is known as the Total *Absolute* Error (TAE).
+
+$TAE = \sum|f_i - \bar{f}|$
+
+For our example:
+
+```{r}
+df$Abs.Error <- abs(df$Error)
+df
+TAE <- sum(df$Abs.Error)
+TAE
+```
+
+### Mean Absolute Error
+
+*Total Absolute Error*, just like the Total Square Error, needs to be adjusted to take account of sample size, since the more observations there are, the larger the total error is likely to be. 
+
+The Standardised Absolute Error (SAE) records the average model error per observation.  
+
+$SAE = \frac{\sum|f_i - \bar{f}|}{N}$
+
+In R, we can use the `sum( )` function to find the number of observations being summed:
+
+```{r}
+SAE <- TAE / sum(df$Obs.Freq)
+SAE
+```
+
+### Proportion Misclassified
+
+A final refinment is to rescale the Standardised Absolute Error by dividing it by two, in order to find the *proportion misclassified* (PM). 
+
+$PM = \frac{\sum|f_i - \bar{f}|}{2N}$
+
+```{r}
+PM <- SAE / 2
+PM
+```
+
+Or you can run the following function:
+```{r}
+  pm <- function(y, x) {
+    Y <- y / sum(y)
+    X <- x / sum(x)
+    ID <- 0.5 * sum(abs(Y - X))
+    round(ID,3)
+  } # y: observed frequency; x: expected model frequency
+
+pm(Obs.Freq, Model.Freq)
+```
+
+
+The proportion misclassified represents the smallest proportion of cases that would have to change categories in order to achieve a perfect fit with the model ie. an even distribution across categories.
+
+A value of 0 (0%) indicates that the observed frequency distribution exactly matches the model frequency distribution (ie. an even spread across the available categories). A value of 1 (100%) indicates no overlap between the observed and model frequency distributions. In the example above, 41.67% of our population of 12 respondents (ie. 5) would have change `Tenure` category to match the model assumption of an even distribution across categories: 
+
+```{r, echo=FALSE}
+Observed <- c("7", "4", "0", "1")
+Change <- c("-4","-1","+3","+2")
+Result <- c("3","3","3","3")
+df <- data.frame(Observed, Change, Result)
+```
+
+```{r kable4, eval=TRUE, echo=FALSE}
+kable_styling(kable(df), full_width=F)
+```
+
+As can be seen above, five persons have to leave their original category (-4 + -1 = -5); and the same five persons then have to join a new category (+3 + +2 = +5).
+
+The proportion misclassified is also variously known as the Index of Dissimilarity (IoD) or the Gini Coefficient. All three are mathematically equivalent.
+
+Within Geography the IoD is widely used to study the spatial segregation of population sub-groups. Within economics the Gini Coefficient is widely used to study the distribution of income.  
+
+Here our assumed model has been one of an even distribution, over a set of either social or spatial categories. More commonly an alternative  model is used. For example, the spatial distribution of 'Whites' could be treated as the *model* / *standard* against which the spatial distribution of other ethnic groups is compared.
+
+**TASK #3** Using the QLFS visualise and calculate the proportion misclassified for *two* categorical variables of your choice.
+
+# Appendix: Concepts and Functions to Remember
+
+Function | Description
+----------|---------------------------------------------
+mean() | calculate mean
+median() | calculate median
+mode() | return the mode (use the function provided in this notebook)
+sd() | calculate sample standard deviation
+quantile() | return a specifc percentile of a set of numbers
+pm() | proportion *misclassified* (use the function provided in this notebook)
+sum() | sum of a variable vector 
+summary() | return min, q1, median, q3 and max values
+

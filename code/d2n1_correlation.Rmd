@@ -1,0 +1,197 @@
+---
+title: "Correlation"
+subtitle: "Correlation Visualisation & Measures"
+author: "Francisco Rowe"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_html:
+      number_sections: true
+      css: extra.css
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_book:
+    citation_package: natbib
+    latex_engine: xelatex
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+library(knitr)
+library(tidyverse)
+library(kableExtra)
+library(Hmisc) # compute statistical significance of correlations
+library(ggcorrplot) # visualise correlation matrices
+library(RColorBrewer) # nice colour schemes
+library(viridis) # nice colour schemes
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+```
+
+
+In this session, we turn our focus on understanding how we can measure the relationship between two variables. 
+
+We are often interested in associations eg. How is unemployment associated with education? How is commuting associated with income?
+
+# Read data
+
+```{r}
+# clean workspace
+rm(list=ls())
+# load data
+load("../data/data_census.RData")
+```
+
+
+```{r, eval=FALSE}
+#introducing the data
+head(census)
+```
+
+* Each row corresponds to a district
+
+* The dataset records the % of persons in each district falling into a range of socio-demographic categories, except for the first five columns, which record geographic information.
+
+**TASK #1** Explore the structure of the data
+
+# Correlation: The Logic
+
+
+
+```{r, fig.margin = TRUE, fig.cap = 'Fig.1 relationship unemployment and education across UK districts'}
+ggplot(data=census) +
+  geom_point( aes(y= Unemployed, x= No_Quals) )   +
+  geom_smooth(aes(y= Unemployed, x= No_Quals), method = "lm", se=FALSE) +
+    # Add labels
+    labs(title= paste(" "), y="Unemployed (%)", x="No Qualification (%)") +
+    theme_classic() +
+    theme(axis.text=element_text(size=14))
+```
+
+*Correlation coefficient* measures the strength of the relationship between two variables.
+
+## Correlation & Type of Data
+
+Measure | Type of Data | Range
+----------|---------------------------------------------
+Pearson | symmetrical continuous distributions | -1 to +1
+Spearman Rank | one or both skewed distributions | -1 to +1
+Spearman Rank | both ordinal | -1 to +1
+Cramer's V | one or both nominal | 0 to +1
+
+In practice: Cramer's V is rarely used.
+
+# Correlation
+
+*Correlation between continuous variables*
+
+```{r}
+attach(census)
+# Pearson correlation
+cor( No_Quals, Unemployed, method="pearson")
+# Spearman correlation
+cor( No_Quals, Unemployed, method="spearman")
+```
+
+Between all possible combinations of variables in a data frame:
+
+```{r, eval=FALSE}
+pc <- cor( census[ , -c(1:5) ], method="pearson" )
+round(pc, 2)
+```
+
+
+**TASK #2** Identify the 3 variables most strongly and most weakly correlated with the % of residents in ill health (illness).
+
+**TASK #3** Create graphs visualising examples of strong, moderate and weak correlations.
+```{r, include=FALSE}
+# eg.
+ggplot(data=census) +
+  geom_point( aes(y= illness, x= Professionals) )   +
+    # Add labels
+    labs(title= paste(" "), y="Illness (%)", x="Professionals (%)") +
+    theme_classic() +
+    theme(axis.text=element_text(size=14))
+```
+
+# Testing Statistical Significance
+
+We use a different function `rcorr` from the `Hmisc` package.
+```{r}
+pc <- rcorr(as.matrix(census[, 6:10]), type = "pearson")
+pc
+```
+
+# Visualisation
+
+Visualising correlation matrices
+
+```{r, fig.margin = TRUE, fig.cap = 'Fig.2 Correlogram'}
+# get correlations
+pc <- cor( census[ , -c(1:5) ], method="pearson" )
+ggcorrplot(pc)
+```
+You can adjust the options and add the statistical significance:
+
+```{r}
+# get p-values
+sig <- cor_pmat(pc)
+# draw correlogram
+ggcorrplot(pc, method = "square", type= "upper", 
+          ggtheme = ggplot2::theme_classic,
+          hc.order= TRUE, colors = brewer.pal(n = 3, name = "RdBu"), 
+          outline.col = "white", lab = FALSE,
+          p.mat = sig) + scale_fill_viridis(option="inferno")
+```
+
+There are more functions and packages you can explore: 
+
+* `corrplot` - corrplot package
+
+* `ggcor` - ggally package
+
+*Correlation between continuous and categorical variables*
+
+Using the QLFS and density distributions:
+
+```{r, echo=FALSE}
+rm(list=ls())
+# load data
+load("../data/data_qlfs.RData")
+attach(qlfs)
+# create new data frame
+df <- qlfs %>% filter(!is.na(NetPay)) %>% 
+  filter(!is.na(EthnicGroup)) %>% 
+  filter(NetPay >= 0)
+# remember to:
+detach(qlfs)
+# and:
+attach(df)
+```
+
+
+```{r, fig.margin = TRUE, fig.cap = 'Fig.3 Net Pay Density by Ethicity'}
+ggplot(data= df) +
+  geom_density(alpha=0.5, colour="#FF6666", aes(x = NetPay, fill = EthnicGroup))
+```
+
+Another way to visualise data distributions is using boxplots:
+
+```{r, warning=FALSE}
+ggplot(data = df) +
+  geom_boxplot(aes(x = EthnicGroup, y= NetPay, fill= EthnicGroup)) +
+  theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=8), legend.position="none") +
+  scale_x_discrete(name="Ethnic Group") +
+  scale_y_continuous(limits = c(0, 1500), name="Weight (Net Pay (weekly))")
+  
+```
+
+# Appendix: Concepts and Functions to Remember
+
+Function | Description
+----------|---------------------------------------------
+cor() | compute Pearson's (method="pearson") or Spearman's (method="spearman") correlation
+rcorr(), cor_pmat() | compute statistical significance

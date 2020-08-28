@@ -1,0 +1,124 @@
+---
+title: "Introduction to Statistical Learning in R"
+author: '[Francisco Rowe](http://www.franciscorowe.com) ([`@fcorowe`](http://twitter.com/fcorowe))'
+date: ''
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  tufte::tufte_book:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_html:
+    css: extra.css
+link-citations: yes
+subtitle: Computational Notebooks
+bibliography: skeleton.bib
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+```
+
+# Description
+
+This notebook introduces the course *Introduction to Statistical Learning in R*. The course will provide an introduction to statistics and probability covering essential topics in descriptive and inferential statistics and supervised machine learning. It will adopt a problem-to-solution teaching approach, defining a practical problem and illustrating how statistics can enable understanding to make critically informed decisions about a population by examining a random sample. It will use a learning-by-doing approach based on real-world examples in various contexts. This will also teach how to conduct statistical data analysis in R. The course is organised around 2 days and 6 sessions - 3 sessions each day. Each session is designed to provide a combination of key statistical concepts and practical application through the use of R.
+
+The course will comprise three main components. The first component will focus on descriptive statistics, including descriptive statistics of different data types, common probability distributions and measures of centrality and dispersion. The second component will involve inferential statistics covering hypothesis testing, confidence intervals, correlation and regression analysis. 
+
+The course will also offer an opportunity to have, either a session on advanced topics on supervised machine learning approaches and cross-validation, or a more personalised data studio session to which you can bring your own data and questions for one-on-one discussion.
+
+## Learning outcomes
+Having successfully completed this course, you will be able to:
+
+1.	Conduct exploratory statistical data analysis.
+2.	Have an understanding of elementary probability distributions and data types.
+3.	Perform correlation and regression data analysis using real-world data.
+4.	Assess the statistical significance between different data types.
+5.	Carry out statistical data analysis in R.
+6.  Have a basic understanding of supervised machine learning and cross-validation.
+
+Before undertaking this course, the following DataCamp courses are recommended: [Introduction to R](https://www.datacamp.com/courses/free-introduction-to-r) and [Importing & Cleaning Data with R](https://www.datacamp.com/tracks/importing-cleaning-data-with-r).
+
+# Schedule
+
+The notes for each session are:
+
+Day 1
+
+* **10:00/12:00:** [**Introduction to R**](d1n1_intro.html): Data types & probability distributions
+* [Lunch break]
+* **13:00/14:30:** [**Descriptive Statistics**](d1n2_summary.html): Measures of centrality & dispersion for continuous & categorical data
+* [Coffee break]
+* **14:45/16:45:** [**Statistical Significance**](d1n3_confidence.html): Hypothesis testing & confidence intervals
+
+Day 2
+
+* **9:00/10:30:** [**Correlation**](d2n1_correlation.html): Correlation visualisation & measures
+* [Coffee break]
+* **10:45/12:15:** [**Regression Analysis**](d2n2_regression.html): Linear regression & dummy variables
+* [Lunch break]
+* **13:15/14:45:** [**Regression Analysis**](d2n2_regression.html): Logistic regression
+* [Coffee break]
+* **15:00/17:00:** **Data Studio** OR [**Supervised Machine Learning**](d2n3_machinelearning.html): Tree Regressions, Random Forest & Cross-validation
+
+NOTE: If you opt for the Data Studio session, you will have a chance to work and play with your own data and ask specific questions about your own data challenges.
+
+These notes are available in three formats:
+
+* As computational R notebooks (Rmd format) in the *notebooks* folder. You can open and run these on RStudio.
+* As html files in the *html* folder.
+* As pdf files in the *pdf* folder.
+
+# Data
+
+For this course, we will use 2011 Census data for England and Wales, and the *Quarterly Labour Force Survey (QLFS)*. QLFS is a quarterly sample survey of households living at private addresses in the United Kindgdom. The survey is conducted by the Office for National Statistics. Its purpose is to provide information on the UK labour market. We will be using the file ‘qlfs.Rdata’, which contains a small sub-set of the information collected by the QLFS in the first quarter (January to March) 2012. 
+
+For the purposes of this course, I have cleaned and pruned the original dataset, and saved the resulting file in R format (`.Rdata`). The census data are in aggregate format at the district level and is labelled ‘data_census’.
+
+The data and relevant documentation will be available in the *data* folder. However, before you do use the data you must complete the *data access* test on [Google Forms](https://forms.gle/HP3z5PxeYdztMYVe9). The test informs you about the conditions attached to being allowed to access the QLFS; you pass the test by agreeing to these conditions which then makes the QLFS available for you to use. 
+
+# Dependencies
+
+This course requires the following libraries installed on your machine prior to the course:
+
+* **tufte**
+* **knitr**
+* **kableExtra**
+* **tidyverse** which includes ggplot2, dplyr, tidyr, readr, purrr, tibble, stringr,
+and forcats
+* **lubridate**
+* **modelr**
+* **broom**
+* **jtools** 
+* **huxtable**
+* **tree**
+* **boot**
+* **MASS**
+* **ISLR**
+* **randomForest**
+* **rsample**
+* **Hmisc**
+* **ggcorrplot**
+* **RColorBrewer**
+* **viridis**
+* **coefplot**
+* **psych**
+
+Each notebook has slightly different dependencies that cater to the topics covered in each session. To run the notebook for the first session, for example, you will need to install the following libraries: `tufte`, `knitr`, `tidyverse` and `kableExtra` ^[You can install package `mypackage` by running the command `install.packages("mypackage")` on the R prompt or through the `Tools --> Install Packages...` menu in RStudio.].
+
+
+* Further reading on tidyverse, see [R for Data Science](https://r4ds.had.co.nz) @grolemund_wickham_2019_book.
+
+
+
+```{r, include=FALSE}
+#This page was last built on:
+#date()
+```

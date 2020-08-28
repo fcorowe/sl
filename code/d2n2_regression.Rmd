@@ -1,0 +1,631 @@
+---
+title: "Regression Analysis"
+subtitle: "Linear, Logistic Regression & Dummy Variables"
+author: "Francisco Rowe"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_html:
+      number_sections: true
+      css: extra.css
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_book:
+    citation_package: natbib
+    latex_engine: xelatex
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+library(knitr)
+library(tidyverse)
+library(kableExtra)
+library(modelr) # provide easy pipeline modeling functions
+library(broom) # help to tidy up model outputs
+library(coefplot) # plot regression coefficients
+library(Hmisc) # compute statistical significance of correlations
+library(psych) # create dummy variables
+library(jtools) # create nice exportable regression tables
+library(huxtable) # create nice exportable regression tables
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+```
+
+Now we turned to examining regression modelling which enables:
+
+* exploring the relationship between an outcome variable and multiple variables; and,
+* predicting possible future scenarios.
+
+# Modelling Approaches & Data Types
+
+Type of Data | Category | Approach
+----------|----------------|-----------------------------
+Scale/continuous | Categorical: Binary | Multiple linear regression
+Categorical | Nominal: Binary | Logistic regression
+Categorical | Nominal: Multiple | Multiple logistic regression
+Categorical | Ordinal: Multiple | Ordinal logistic regression
+Categorical | Count | Poisson regression
+
+# Multiple Linear Regression
+
+## The intuition
+
+A Multiple Linear Regression captures the average linear relationship.
+
+```{r}
+# clean workspace
+rm(list=ls())
+# load data
+load("../data/data_census.RData")
+```
+
+```{r, echo=FALSE, fig.margin = TRUE, fig.cap = 'Fig.1 relationship unemployment and illness'}
+ggplot(data=census) +
+  geom_point( aes(y= illness, x= Unemployed) )   +
+  geom_smooth(aes(y= illness, x= Unemployed), method = "lm", se=FALSE) +
+    # Add labels
+    labs(title= paste(" "), y="Illness (%)", x="Unemployed (%)") +
+    theme_classic() +
+    theme(axis.text=element_text(size=14))
+```
+
+This simple regression line can described using the equation:
+
+$$y = \alpha + \beta_{1} x_{1} + \epsilon$$
+
+* $y$: dependent variable (or outcome variable, predicted variable, explained variable)
+
+* $\alpha$: constant (or intercept)
+
+* $\beta_{1}$: regression coefficient (or slope, coefficient, beta coefficient, estimated coefficient, estimated parameter)
+
+* $x$: independent variable (or explanatory variable, covariate, predictor, control variable)
+
+* $\epsilon$: error term
+
+Why is a multiple regression model known as *'ordinary least squares'* or *OLS* regression?
+
+The regression line is computed minimising the *total sum squares*; that is, the sum of distances from each point in the scatter point to the regression line. The line which minimises this sum is the regression line.
+
+**TASK #2** How would the regression line be if $\beta$ = 0? 
+
+If you add more independent variables, the regression equation becomes:
+
+$$y = \alpha + \beta_{1} x_{1} + \beta_{2} x_{2} + \beta_{3} x_{3} + ... + \beta_{k} x_{k} + \epsilon$$
+
+##Interpretation
+
+*Intercept* ($\alpha$): is the estimated average value of $y$ when the value of $x$ is zero.
+
+*Slope* ($\beta$): is the estimated average change in $y$ for a one unit change in $x$, when all other explanatory variables are held constant.
+
+## Estimation
+
+Let's explore the following question: how do local factors affect residents’ long-term illness in the UK?
+
+We can use our census data and explore how the local population can explain differences in the percentage of ill population across districts in the UK.
+
+We want to estimate the following model:
+
+$$y = \alpha + \beta_{1} x_{1} + \beta_{2} x_{2} + \beta_{3} x_{3} + \epsilon$$
+$$illness = \alpha + \beta_{1} noqualification + \beta_{2} professionals + \beta_{3} elderly + \epsilon$$
+
+```{r}
+# specify a model equation
+eq <- illness ~ No_Quals + Professionals + Age_65plus
+model <- lm(formula = eq, data = census)
+# coefficients
+round(coefficients(model),2)
+```
+
+ie. 
+
+$$\hat{y} = 4 + 0.44 x_{1} - 0.10 x_{2} + 0.29 x_{3}$$
+
+*Interpretation*: A 1% point increase in the percentage of people with no qualification is associated with a rise in the percentage of local long-term ill population by .44%, with the percentage of professional and elderly population held constant
+
+## Predictions
+
+Individual predictions:
+```{r}
+# using base functions
+census$p_illness <- predict.lm(model)
+```
+
+Let's see the observed and predicted \% of long-term illness for Liverpool:
+```{r}
+census[166, c(1, 6, 24)]
+```
+
+**TASK #3** Obtain the \% of long-term illness for Cheltenham.
+```{r, include=FALSE}
+census[58, c(1, 6, 24)]
+```
+
+You can use predictions to assess 'what-if' scenarios.
+```{r}
+# get typical values
+attach(census)
+a_x1 <- mean(No_Quals)
+a_x2 <- mean(Professionals)
+# prediction if the population aged 65+ is 30%
+4.00 + 0.44*a_x1 - 0.10*a_x2 + 0.29*30
+```
+
+## Model Assessment
+
+Full model output:
+```{r}
+summary(model)
+```
+
+The summary output indicates:
+
+* *Residuals*: summary statistics of the distribution of residuals (model error)
+
+* *Coefficients*: model coefficients and their statistical significance
+
+* *R-squared*: indicates how much of the variation in the dependent variable is ‘explained’ by the explanatory variables.
+
+* *F statistics*: indicates whether the fitted model is a statistically significant improvement on the null model.
+
+### Overall Fit
+
+*R-squared* and *F test*: A problem with *R-squared* is hat every time an additional variable is added to the model, the R-squared will increase. 
+
+* *Adjusted R-squared* and *Akaike’s Information Criterion* (AIC): take into account the number of explanatory variables in the model when assessing model fit. The $AIC$ is more robust so that adding extra variables to the model doesn’t necessarily lead to an improvement. Smaller *AIC* scores indicate better fit. 
+
+```{r}
+# compute AIC
+AIC(model)
+```
+
+A limitation: *AIC* can only be compared between models fitted to the same data; *R-squared* can be compared between models fitted to any data.
+
+Alternatives:
+
+* *Correlation coefficient*: between the observed and predicted value of your dependent variable. The resulting measure is comparable between models and datasets, but assumes relationships are linear.
+
+```{r}
+# compute correlation
+cor(p_illness, illness)
+```
+
+* *MSE*: enables comparison between models and datasets.
+```{r}
+# compute MSE
+census %>% 
+  add_predictions(model) %>%
+  summarise(MSE = mean((illness - pred)^2))
+```
+
+### Individual Coefficients
+
+We assess the sign, size and statistical significance of coefficients.
+
+```{r}
+# summary output and CIs in a single table
+cbind(summary(model)$coefficients, confint(model) )
+```
+
+You can also visualise the regression outputs using `coefplot`:
+
+```{r, fig.margin = TRUE, fig.cap = 'Fig.2 plotting regression coefficients'}
+coefplot(model, title = " ", xlab = "Coefficient", ylab = " ",
+         intercept=FALSE, horizontal = FALSE,
+         color = "black", offset=0.2, sort='magnitude', fillColor = "grey")
+```
+
+**TASK #4** Estimate an additional model and compare the estimates with model above
+
+# Dummy Variables
+
+So far, we have explored how to treat independent variables measured in a continuous scale. What about if we want to understand differences across *qualitative attributes* eg.
+
+* Where is the rate of long-term illness higher in particular *regions* of the UK? Does it vary much across regions? 
+
+* Is there a *gender* pay gap?
+
+* How does *ethnicity* influence the industry people work?
+
+* How does *marital status* influence house ownership?
+
+* What *age group* is more migratory?
+
+Now we focus on how to quantify the relationship between qualitative attributes and an outcome variable.
+
+## The Theory
+
+What Are Dummy Variables (DVs)?
+
+* are categorical variables that take the value of 0 or 1
+
+* serve to quantify the relationship between an outcome variable and a qualitative attribute
+
+We can create DVs from categorial data or classifying continuous variables into categories (eg. income quantiles).
+
+### Example: 2 Categories
+
+id | gender | female
+----|----|----
+1 | female | 1
+2 | female | 1
+3 | male | 0
+4 | female | 1
+
+### Example: 3+ Categories
+
+id | qualification | no qualification | degree
+----|----|----|----
+1 | degree | 0 | 1
+2 | no qual | 1 | 0
+3 | no qual | 1 | 0
+4 | 2+ A levels | 0 | 0
+
+## Practice
+
+Let's explore how the % of long-term illness vary across regions in the UK. 
+
+We have 10 regions in the dataset, so let's create our dummy variables.
+
+```{r}
+# create dummy variables
+region_dv <- dummy.code(census$Region)
+census <- cbind(census, region_dv)
+census[1:10,c(2,24:34)]
+```
+
+**NOTE**: To fit regression models, we need a *base category* ie. we need to exclude one of the categories. If our variables has 5 categories, we only include 4 dummy variables. The category that is excluded serves as our base category.
+
+## Estimation Using DVs
+
+$$illness = \alpha + \beta_{1} X_{1} + \beta_{2} X_{2} + \beta_{3} X_{3} + \beta_{4} D_{1} + \beta_{5} D_{2} + .... + \beta_{12} D_{9} + \epsilon$$
+
+```{r, message=FALSE, warning=FALSE}
+attach(census)
+# specify a model equation
+eq2 <- illness ~ No_Quals + Professionals + Age_65plus + as.matrix(census[,c(25:29, 31:34)])
+model2 <- lm(formula = eq2, data = census)
+export_summs(model2)
+```
+
+In a graph:
+```{r, fig.margin = TRUE, fig.cap = 'Fig.3 regression coefficients'}
+# plot coefficients
+coefplot(model2, title = " ", xlab = "Coefficient", ylab = " ",
+         intercept=FALSE, horizontal = FALSE,
+         color = "black", offset=0.2, sort='magnitude', fillColor = "grey")
+```
+
+## Alternative approaches to DVs
+
+If the independent variable you want as a DV is a factor, you can just execute `lm()`:
+```{r}
+eq3 <- illness ~ No_Quals + Professionals + Age_65plus + Region
+model3 <-lm(formula = eq3, data = census)
+```
+
+Or you can create dummy variables in the `lm()` function using `factor()`. Note: this functionality may not be available with all packages and modelling frameworks.
+```{r}
+# dummy variables using `factor()`
+eq4 <- illness ~ No_Quals + Professionals + Age_65plus + factor(Region)
+model4 <- lm(formula = eq4, data = census)
+```
+
+**TASK #5** Compare the results from these approaches by:
+```{r, eval=FALSE}
+# comparing models  
+export_summs(model2, model3, model4)
+```
+
+## Changing The Base Category
+
+We can use the `relevel()` function to directly specify the base category. 
+
+Note: 
+
+* It achieves this by changing the order of the levels in a factor variable
+
+* This causes a *permanent* change in the order of the factor levels so remember to reverse the change, or create a second version of your data frame
+
+* `relevel()` only works for unordered factors
+
+```{r}
+# check the order of levels
+levels(census$Region)
+# change reference category
+census$Region <- relevel(census$Region, ref="West Midlands")
+# check levels again
+levels(census$Region)
+# estimate a new regression
+eq5 <- illness ~ No_Quals + Professionals + Age_65plus + factor(Region)
+model5 <- lm(formula = eq5, data = census)
+export_summs(model5)
+```
+
+ 
+# Logistic Regression
+
+We have learned how to estimate the associations for models with *independent continuous* and *categorical* variables when the **outcome** variable is *continuous*. 
+
+$$y = \alpha + \beta_{1} X_{1} + \beta_{2} X_{2} + \beta_{3} X_{3} + \beta_{4} D_{1} + \epsilon$$
+
+What about when the outcome variable is *categorical*?
+
+Examples:
+
+* Health outcomes/behaviours:
+  eg. smoking, drinking, cancer, heart attack, HIV, etc.
+
+* Employment outcomes:
+  unemployed, employed full-time, employed part-time, self-employed, job satisfaction, etc.
+
+* Decision making processes:
+  University, Brexit vote, travelling, migration, long-distance commuting, etc.
+
+To motivate this session, we will seek to answer the following question: *Who are more likely to use sustainable transport?*
+
+**Read QLFS data**
+```{r}
+# clean workspace
+rm(list=ls())
+# load data
+load("../data/data_qlfs.RData") 
+```
+
+Create our sustainable transport variable
+```{r}
+qlfs <- mutate(qlfs, 
+               sus_tr = ifelse(
+                 TravelMode == "Motorbike,moped,scooter" 
+                 | TravelMode == "Bicycle"
+                 | TravelMode =="Walk"
+                 , 1, 0))
+```
+
+## Probability, Odds & Log-odds
+
+They all use a different denominator so they have different meaning.
+
+An example:
+
+```{r}
+attach(qlfs)
+t1 <- table(sus_tr, Sex)
+```
+### Probability
+
+Probability of using sustainable transport if female:
+
+1148 / (26189 + 1148) = 0.041
+
+### Odds
+
+Odds of using sustainable transport if female:
+
+1,148 / 26,189 = 0.044
+
+### Log-odds
+
+Log-odds of using sustainable transport if female
+
+$log({1,148}/{26,189})$ = $log(0.044)$ = -3.12
+
+Note:
+
+* Probabilities can vary between 0 and 1
+* Odds can vary between 0 and infinity
+* Log-odds can vary between -ve infinity and +ve infinity
+
+## Formal Definition
+
+Logistic regression is one of a family of regression models known as "General Linear Models" (GLMs).
+
+GLMs are characterised by three properties:
+
+* The assumed distribution of the model errors
+
+* The transformation (link function) applied to the outcome variable
+
+* The way in which model error (deviance) is measured (log likelihood)
+
+Logistic regression models:
+
+* Predict the the log-odds of an event happening based on at least one independent variable
+vs. linear regression - estimates the average value
+
+* Dependent variable: qualitative (dummy or binary) variable
+vs. linear regression - continuous variable
+
+* Requires estimates of the dependent variable to lie between 0 and 1 (i.e. positive values)
+vs. linear regression - continuous variable
+
+* Assumes a logistic (binomial) distribution vs. linear regression - normal distribution
+
+Various names: binary regression model, discrete choice model, probability regression model, and
+qualitative response regression model
+
+In mathemathical terms for a model with a single independent variable:
+
+
+$$log(p(1-p)) = \alpha + \beta_{1} x_{1}$$
+which can be rearrange:
+
+$$ p = \frac{exp(\alpha + \beta_{1} x_{1}) }{ 1 + exp(\alpha + \beta_{1} x_{1})} $$
+
+$p$: probability of an event happening
+
+$\alpha$: regression intercept
+
+$\beta_{1}$: regression coefficient associated to $x_{1}$
+
+## Interpretation
+
+### Log-odds
+
+*Intercept* is the log-odds of an event happening (ie. $y=1$) if the value of the explanatory variables $x$s is zero.
+
+*Slope* is the estimated change in the log-odds for one unit change in $x_{k}$, holding all other variables constant.
+
+### Interpretation of $Exp(\beta_{k} x_{k})$
+
+They give the expected change in the odds for a unit change in $x$s, holding all other variables constant.
+
+$Exp(\beta_{k} x_{k})$ = 1, if $\beta = 0$: indicates is equally likely to occur.
+
+$Exp(\beta_{k} x_{k})$ > 1, if $\beta > 0$: indicates an event is more likely to occur, or the odds are '$\beta_{k}$ times larger'
+
+$Exp(\beta_{k} x_{k})$ < 1, if $\beta < 0$: indicates an event is less likely to occur, or the odds are '$\beta_{k}$ times smaller'
+
+## Practice
+
+### General Function
+
+In R, we use the basic syntax for fitting a general linear model:
+
+```{r, eval=FALSE, echo=TRUE}
+# general function
+glm(outcome ~ predictor(s), data = dataframe,
+    family = name of assumed error distribution(link = name of a link function),
+             na.action = na.exlcude  OR  na.fail) )
+```
+
+Hence, to fit a logistic regression model, the code required is:
+
+```{r, eval=FALSE, echo=TRUE}
+# estimate a logistic regression
+glm(outcome ~ predictor(s), data= data.frame,
+    family=binomial(link="logit"),
+    na.action=na.exclude)
+```
+
+## Estimation
+
+```{r, eval=TRUE, echo=TRUE}
+# specify a model
+eq1 <- sus_tr ~ Sex + AgeGroup + NetPay
+# estimate model
+model1 <- glm(eq1, data= qlfs,
+                      family=binomial(link="logit"),
+                      na.action=na.exclude)
+
+# coefficients (log-odds)
+round(coefficients(model1),2)
+```
+
+
+```{r, eval=FALSE}
+# odds ratio
+round(exp(coef(model1)),2)
+```
+
+```{r}
+## odds ratios and 95% CI
+round(exp(cbind("Odds-ratio" = coef(model1), confint(model1))),2)
+```
+
+What is the base category for Sex? and for Age Group? *Hint: excluded category*
+
+*Interpretation*: 
+
+For *SexFemale*, a $Exp(\beta_{k} x_{k})$ of $1.09$ indicates that being female changes the odds of using sustainable transport (*versus males*) by a factor of  $1.09$, holding all other variables constant.
+i.e. females are 1.09 more likely than males to use sustainable transport.
+
+For *NetPay*, a $Exp(\beta_{k} x_{k})$ of $1$ indicates that for every one pound change, the odds of using sustainable transport by a factor of $1$ (*versus not using sustainable transport*), holding all other variables constant. 
+ie. equal chance.
+
+*Note*: R produces the odds ratio for the intercept but it is rarely interpreted.
+
+
+## Model Assessment
+
+Full model output:
+```{r}
+summary(model1)
+```
+
+The summary output indicates:
+
+* *Residuals*: summary statistics of the distribution of residuals (model error)
+
+* *Coefficients*: model coefficients and their statistical significance. **Note**: The logistic regression coefficients give the change in the log odds of the outcome for a one unit increase in the predictor variable eg. being female, versus male, changes the log odds of using sustainable transport by 0.09.
+
+* *Deviance*: Deviances for a null and full model. If the *Residual deviance* < *Null deviance*, the better the model
+
+* *AIC*: Akaike's Information Criterion - the lower the better the model.
+
+### Overall Fit
+
+Formal chi-squared test based on the null and residual model deviances. 
+```{r}
+# computing the p-value for the test
+with(model1, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+```
+
+**TASK #5**: What is the null hypothesis of this test?
+
+*Interpretation of the test*: The chi-square of 1563.814 with 5 degrees of freedom and an associated p-value of less than 0 tells us that our model is a significantly better fit to the data than an empty model.
+
+To compare across different model specifications use the *AIC*.
+
+## Visualising Probabilities
+
+### Estimating Probabilities
+
+Create a new data set for *Female* with varying values for *AgeGroup* and *PayNet*
+```{r}
+df_p <- with(qlfs, data.frame(Sex = factor("Female", levels = c("Male", "Female"))
+  , AgeGroup = factor(c("16-29", "30-44", "45-64", "65+"))
+  , NetPay = rep(seq(from = 200, to = 800, length.out = 100), 4)
+  )
+)
+```
+
+Computing probabilities and their CIs:
+```{r}
+# add se
+df_pci <- cbind(df_p, predict(model1
+                             , newdata = df_p,
+                             type = "link",
+                             se = TRUE)
+               )
+# add CIs
+df_pci <- within(df_pci, {
+    p_prob <- plogis(fit)
+    ci95_lb <- plogis(fit - (1.96 * se.fit))
+    ci95_ub <- plogis(fit + (1.96 * se.fit))
+})
+
+#View
+head(df_pci)
+```
+
+### Visualising Probabilities
+
+```{r, fig.margin = TRUE, fig.cap = 'Fig.4 Predicted probabilities'}
+ggplot(df_pci, aes(x = NetPay, y = p_prob)) +
+  geom_ribbon(aes(ymin = ci95_ub, ymax = ci95_lb, fill = AgeGroup), alpha = 0.2) +
+  geom_line(aes(colour = AgeGroup), size = 1) +
+  theme_classic()
+```
+
+
+# Appendix: Concepts and Functions to Remember
+
+Function | Description
+----------|---------------------------------------------
+lm() | estimate linear regression
+glm() | estimate logistic regression
+predict.lm() | create prediction based on linear regression estimates
+predict() | predict probabilities based on logistic regression estimates
+mutate() | create new variables
+dummy.code() | create dummy variables
+relevel() | change reference category
+cbind() | combine data objects into a single data frame
+coefplot() | plot coefficients
+export_summs() | create and export regression tables
+
+
