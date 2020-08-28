@@ -3,7 +3,8 @@ title: "Introduction to Statistical Learning in R"
 author: '[Francisco Rowe](http://www.franciscorowe.com) ([`@fcorowe`](http://twitter.com/fcorowe))'
 date: ''
 output:
-  pdf_document: default
+  tufte::tufte_html:
+    css: extra.css
   html_document:
     df_print: paged
   tufte::tufte_book:
@@ -12,8 +13,7 @@ output:
   tufte::tufte_handout:
     citation_package: natbib
     latex_engine: xelatex
-  tufte::tufte_html:
-    css: extra.css
+  pdf_document: default
 link-citations: yes
 subtitle: Computational Notebooks
 bibliography: skeleton.bib
@@ -47,8 +47,6 @@ Before undertaking this course, the following DataCamp courses are recommended: 
 # Schedule
 
 The notes for each session are:
-
-
 
 * **Session 1** [**Introduction to R**](d1n1_intro.html): Data types & probability distributions
 * **Session 2** [**Descriptive Statistics**](d1n2_summary.html): Measures of centrality & dispersion for continuous & categorical data
