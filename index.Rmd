@@ -61,7 +61,7 @@ The notes for each session are:
 
 For this course, we uses 2011 Census data for England and Wales, and the *Quarterly Labour Force Survey (QLFS)*. QLFS is a quarterly sample survey of households living at private addresses in the United Kingdom. The survey is conducted by the Office for National Statistics. Its purpose is to provide information on the UK labour market. A file labelled ‘qlfs.Rdata’ contains the data. It is a small sub-set of the information collected by the QLFS in the first quarter (January to March) 2012. 
 
-For the purposes of this course, I have cleaned and pruned the original dataset, and saved the resulting file in R format (`.Rdata`). The census data are in aggregate format at the district level and is labelled ‘data_census’. The data and relevant documentation will be available in the [*data* folder](../data). 
+For the purposes of this course, I have cleaned and pruned the original dataset, and saved the resulting file in R format (`.Rdata`). The census data are in aggregate format at the district level and is labelled ‘data_census’. The data and relevant documentation will be available in the [*data* folder]("../data"). 
 
 # Dependencies
 
