@@ -42,7 +42,7 @@ Having successfully completed this course, you will be able to:
 5.	Carry out statistical data analysis in R.
 6.  Have a basic understanding of supervised machine learning and cross-validation.
 
-# Schedule
+# Structure
 
 The notes for each session are:
 

@@ -421,9 +421,7 @@ names(df)
 
 ## Introducing the data
 
-We will use the *Quarterly Labour Force Survey (QLFS)*. QLFS is a quarterly sample survey of households living at private addresses in the United Kindgdom. The survey is conducted by the Office for National Statistics. Its purpose is to provide information on the UK labour market. We will be using the file ‘qlfs.Rdata’, which contains a small sub-set of the information collected by the QLFS in the first quarter (January to March) 2012. For the purposes of this course, I have cleaned and pruned the original dataset, and saved the resulting file in R format (`.Rdata`).
-
-The data and relevant documentation will be available in the *data* folder. However, before you do use the data you must complete the *data access* test on [Google Forms](https://forms.gle/HP3z5PxeYdztMYVe9). The test informs you about the conditions attached to being allowed to access the QLFS; you pass the test by agreeing to these conditions which then makes the QLFS available for you to use. 
+We will use the *Quarterly Labour Force Survey (QLFS)*. QLFS is a quarterly sample survey of households living at private addresses in the United Kingdom. The survey is conducted by the Office for National Statistics. Its purpose is to provide information on the UK labour market. We will be using the file ‘qlfs.Rdata’, which contains a small sub-set of the information collected by the QLFS in the first quarter (January to March) 2012. For the purposes of this course, I have cleaned and pruned the original dataset, and saved the resulting file in R format (`.Rdata`). The data and relevant documentation are available in the *data* folder.
 
 ## Load data
 

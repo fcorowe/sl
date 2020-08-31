@@ -4,12 +4,12 @@ subtitle: "Tree Regressions, Random Forest & Cross-validation"
 author: "Francisco Rowe"
 date: "`r Sys.Date()`"
 output:
-  tufte::tufte_handout:
-    citation_package: natbib
-    latex_engine: xelatex
   tufte::tufte_html:
       number_sections: true
       css: extra.css
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
   tufte::tufte_book:
     citation_package: natbib
     latex_engine: xelatex
