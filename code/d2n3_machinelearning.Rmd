@@ -32,6 +32,8 @@ knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
 options(htmltools.dir.version = FALSE)
 ```
 
+This session^[Part of [Introduction to Statistical Learning in R](index.html) <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title"> Supervised Machine Learning -- Tree Regressions, Random Forest & Cross-validation</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://franciscorowe.com" property="cc:attributionName" rel="cc:attributionURL">Francisco Rowe</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.] provides an introduction to supervised machine learning.
+
 # What is Machine Learning?
 
 Machine learning traces back to @Samuel_1959 and it is conceived as a subset of artificial intelligence. Machine learning algorithms build mathematical models based on sample data, in order to make predictions or decisions without being explicitly programmed to perform the task.

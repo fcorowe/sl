@@ -93,6 +93,7 @@ Further reading on `tidyverse`, see [R for Data Science](https://r4ds.had.co.nz)
 
 If you use material from this course, you can give appropriate attribution by using the following citation: @rowe_slr20
 
+You can get the materials from this course as a [download](https://github.com/fcorowe/sl/archive/master.zip) of a .zip file or by going directly to the [GitHub repository](https://github.com/fcorowe/sl).
 
 ```{r, include=FALSE}
 #This page was last built on:
