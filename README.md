@@ -37,7 +37,7 @@ The notes for each session are:
 
 ## Citation
 
-If you use the interative map and/or code, you can give appropriate attribution by using the following citation:
+If you use the material, code or processed data, you can give appropriate attribution by using the following citation:
 
 ```
 @article{rowe_slr20,
