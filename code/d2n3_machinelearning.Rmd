@@ -70,10 +70,10 @@ Classification problems ~ qualitative response variable
 
 Regression trees partition a data set into smaller subgroups and then fit a simple constant for each observation in the subgroup. The partitioning is achieved by successive binary partitions based on the different predictors. Like for linear regression, these partitions are chosen minimising the $RSS$ (ie. minimising the total difference between the observed and predicted $y$). The constant to predict is based on the average response values for all observations that fall in that subgroup. To these ends, we train a model on a subset of our data in order to predict an unseen set of the sample.
 
-*An example*: We want to predict individual's net pay income based on age (as a measured of experience) and sex (as a measure of gender discrimination in the labour market). We first remove observatins with missing and negative income values and log-transform NetPay in our QLFS data so its distribution has a more typical bell-shape.
+*An example*: We want to predict individual's net pay income based on age (as a measured of experience) and sex (as a measure of gender discrimination in the labour market). We first remove observations with missing and negative income values and log-transform NetPay in our QLFS data so its distribution has a more typical bell-shape.
 
 
-```{r, eval=TRUE, echo=FALSE, fig.cap = 'Fig.2. A regression tree for predicting the log net pay of individuals based on age and gender. At a given internal node, the label ($X_{j} < t_P{k}$) indicates the left hand branch emanating from that split, and the right-hand branch corresponds to $X_{j} ≥ t_{k}$. The tree has three internal nodes and five terminal nodes, or leaves. The number in each leaf is the mean of the response for the observations. The terminal node indicates that the predicted ney pay for males aged < 23.5 is 5.241'}
+```{r, eval=TRUE, echo=FALSE, fig.cap = 'Fig.2. A regression tree for predicting the log net pay of individuals based on age and gender. At a given internal node, the label ($X_{j} < t_P{k}$) indicates the left hand branch emanating from that split, and the right-hand branch corresponds to $X_{j} ≥ t_{k}$. The tree has three internal nodes and five terminal nodes, or leaves. The number in each leaf is the mean of the response for the observations. The terminal node indicates that the predicted net pay for males aged < 23.5 is 5.241'}
 # clean workspace
 rm(list=ls())
 
@@ -175,7 +175,7 @@ The key idea is to minimise the expected *test error*. Find a smaller tree with 
   * *Variance*: how the predictions would change if we change the training dataset. The idea is to find estimates which vary little between training datasets.
   * *Bias*: error introduced by approximating a real-life problem. The simpler the model, the greater the bias. 
 
-To achive a good balance between variance and bias, a common approach is cost complexity *prunning*: grow a very long tree and then prune it back to obtain a subtree; that is, reduce the complexity of the tree finding the subtree that returns the lowest test error rate. We need to find the tuning parameter $a$ that penalises the tree complexity.
+To achieve a good balance between variance and bias, a common approach is cost complexity *prunning*: grow a very long tree and then prune it back to obtain a subtree; that is, reduce the complexity of the tree finding the subtree that returns the lowest test error rate. We need to find the tuning parameter $a$ that penalises the tree complexity.
 
 ### Cost Complexity Prunning
 
@@ -210,7 +210,7 @@ mse
 sqrt(mse)
 ```
 
-*Interpretation*: the test set MSE associated with the regression tree is 0.43. The square root of the MSE is therefore around 0.663, indicating that this model leads to test predictions that are within around £1.94 of the true median weekly net pay value.
+*Interpretation*: the test set MSE associated with the regression tree is 0.43. The square root of the MSE is therefore around 0.663, indicating that this model leads to average test predictions that are within around £0.663 of the true log of weekly net pay value.
 
 # Random Forest
 
@@ -252,7 +252,7 @@ data_train = sample(
   )
 ```
 
-3) Fit a random forest using 8 variables (usually $p/3$) at each split:
+3) Fit a random forest using 9 variables (usually $p/3$) at each split:
 ```{r}
 # fit random forest
 m1_rf <- randomForest(
@@ -263,6 +263,7 @@ m1_rf <- randomForest(
   importance = TRUE,
   na.action=na.exclude
   )
+m1_rf
 ```
 
 ## Prediction
@@ -282,7 +283,14 @@ mse
 
 ## Importance
 
-We can assess the importance of each variable.
+We can assess the importance of each variable. 
+We can use two measures of variable importance. 
+The *IncMSE* below is based on the mean decrease of prediction accuracy on the out-of-bag samples
+when a variable is excluded from the model. 
+The *IncNodePurity* is a measure of the total decrease in node impurity that results from splits over that
+variable, averaged over all trees. 
+For regression trees,node impurity is measured by the training
+RSS, and for classification trees by the deviance.
 
 ```{r}
 varImpPlot(m1_rf)
@@ -291,9 +299,9 @@ varImpPlot(m1_rf)
 
 # Cross-validation
 
-*Test Error*: Average error of predicting an observation based on a unseen test dataset ie. not used in the training dataset.
+*Test Error*: Average error of predicting an observation based on a unseen test dataset i.e. not used in the training dataset.
 
-*Traning Error*:  Average error of predicting an observation included in the traning dataset.
+*Tranning Error*:  Average error of predicting an observation included in the tranning dataset.
 
 ![Fig.1. 5-fold cross-validation representation. Source: @James_et_al_2013_book.](../figs/crossvalidation.png)
 
